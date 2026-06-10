@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0055)file:///C:/Users/user/Downloads/shopping-finder_17.html -->
+<!-- saved from url=(0055)file:///C:/Users/user/Downloads/shopping-finder_18.html -->
 <html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -612,7 +612,7 @@ async function analyzeImage() {
   if (isDemo()) { await sleep(1500); currentData = {...DEMO_FIND, url:''}; renderResult(DEMO_FIND, true); }
   else {
     try {
-      const res = await fetch('https://corsproxy.io/?https://api.anthropic.com/v1/messages', {
+      const res = await fetch('https://claude-proxy.ducklin0366.workers.dev', {
         method:'POST', headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},
         body: JSON.stringify({model:'claude-sonnet-4-20250514', max_tokens:1500, messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:'image/jpeg',data:currentImgBase64}},
@@ -649,7 +649,7 @@ async function analyzeManual() {
 
 async function callFindText(prompt, url) {
   try {
-    const res = await fetch('https://corsproxy.io/?https://api.anthropic.com/v1/messages', {
+    const res = await fetch('https://claude-proxy.ducklin0366.workers.dev', {
       method:'POST', headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},
       body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})
     });
@@ -772,7 +772,7 @@ ${feature ? '제품 특징: '+feature : ''}
 }
 
 인스타 각 버전은 장소/인물이 완전히 달라야 함. 각 버전마다 해시태그 6개 포함.`;
-      const res = await fetch('https://corsproxy.io/?https://api.anthropic.com/v1/messages', {
+      const res = await fetch('https://claude-proxy.ducklin0366.workers.dev', {
         method:'POST', headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},
         body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:5000,system:SCRIPT_SYSTEM,messages:[{role:'user',content:prompt}]})
       });
@@ -840,7 +840,7 @@ async function regenScript(type) {
     const feature = document.getElementById('scriptFeature').value.trim();
     const typeLabel = type === 'insta' ? '인스타그램 릴스용 대본 (150~250자, 구어체, 훅+문제제기+해결+CTA, 줄바꿈 포함)' : '네이버 블로그용 대본 (1500~2000자, SEO 최적화, ## 소제목 포함, 제품명 키워드 5회 이상)';
     try {
-      const res = await fetch('https://corsproxy.io/?https://api.anthropic.com/v1/messages', {
+      const res = await fetch('https://claude-proxy.ducklin0366.workers.dev', {
         method:'POST', headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},
         body: JSON.stringify({contents:[{parts:[{text: SCRIPT_SYSTEM + '\n\n제품명: ' + product + '\n' + (feature?'특징: '+feature:'') + '\n훅: ' + HOOK_MAP[selectedHook] + '\n\n' + typeLabel + '만 텍스트로 바로 써줘. JSON 아님.'}]}]})
       });
