@@ -1,1 +1,727 @@
+<!DOCTYPE html>
+<!-- saved from url=(0055)file:///C:/Users/user/Downloads/shopping-finder_19.html -->
+<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>쇼핑 소재 수집기</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d; --surface: #161616; --surface2: #1e1e1e;
+    --border: #2a2a2a; --border2: #383838; --text: #f0f0f0;
+    --text2: #999; --text3: #555; --accent: #ff3e6c; --accent2: #ff6b35;
+    --success: #00c97a; --info: #3b82f6; --warn: #f59e0b;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; min-height: 100vh; max-width: 500px; margin: 0 auto; }
+  header { padding: 1.25rem 1.25rem 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+  .logo { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  header h1 { font-size: 16px; font-weight: 700; }
+  header p { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .demo-banner { background: #f59e0b22; border-bottom: 1px solid #f59e0b44; padding: 8px 1.25rem; font-size: 12px; color: var(--warn); }
+  .tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 1.25rem; overflow-x: auto; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 11px 12px; font-size: 12px; color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab-content { display: none; padding: 1.25rem; }
+  .tab-content.active { display: block; }
+
+  input[type="text"], input[type="password"], textarea {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 11px 14px; color: var(--text); font-size: 14px;
+    outline: none; transition: border-color 0.2s; font-family: inherit;
+  }
+  input:focus, textarea:focus { border-color: var(--accent); }
+  input::placeholder, textarea::placeholder { color: var(--text3); }
+  textarea { resize: vertical; line-height: 1.6; }
+
+  .btn { padding: 11px 18px; border-radius: 10px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; white-space: nowrap; }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-ghost { background: var(--surface2); border: 1px solid var(--border2); color: var(--text2); font-size: 13px; padding: 8px 14px; }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  .input-group { margin-bottom: 1rem; }
+  .input-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; display: block; }
+  .input-row { display: flex; gap: 8px; }
+
+  .mode-toggle { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .mode-btn { padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text2); font-size: 12px; cursor: pointer; transition: all 0.2s; }
+  .mode-btn.active { border-color: var(--accent); color: var(--accent); background: #ff3e6c15; }
+
+  .img-upload-area { border: 2px dashed var(--border2); border-radius: 12px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 1rem; }
+  .img-upload-area:hover { border-color: var(--accent); background: #ff3e6c08; }
+  .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .img-preview { width: 100%; max-height: 200px; object-fit: contain; border-radius: 10px; margin-bottom: 1rem; display: none; border: 1px solid var(--border); }
+
+  .loading { display: none; text-align: center; padding: 2rem; color: var(--text2); font-size: 14px; }
+  .spinner { width: 26px; height: 26px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 10px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .result-card { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; margin-bottom: 1rem; }
+  .product-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .product-sub { font-size: 12px; color: var(--text2); margin-bottom: 1.25rem; }
+  .section-label { font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+  .kw-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.25rem; }
+  .kw-tag { font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border2); color: var(--text2); cursor: pointer; transition: all 0.15s; }
+  .kw-tag:hover { border-color: var(--accent); color: var(--accent); }
+  .kw-tag.cn { border-color: #f59e0b44; color: #f59e0b; }
+  .kw-tag.en { border-color: #3b82f644; color: #3b82f6; }
+
+  .site-block { margin-bottom: 1.1rem; }
+  .site-header { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .site-name { font-size: 13px; font-weight: 600; }
+  .search-terms { display: flex; flex-direction: column; gap: 5px; }
+  .search-term-row { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; text-decoration: none; color: var(--text); transition: all 0.2s; }
+  .search-term-row:hover { border-color: var(--border2); background: #252525; }
+  .term-num { font-size: 11px; color: var(--text3); width: 14px; flex-shrink: 0; }
+  .term-text { flex: 1; font-size: 13px; }
+  .term-go { font-size: 11px; color: var(--text3); }
+  .search-term-row:hover .term-go { color: var(--accent); }
+
+  .coupang-exact { display: flex; align-items: center; gap: 8px; padding: 11px 14px; background: #ff3e6c0d; border: 1px solid #ff3e6c33; border-radius: 10px; text-decoration: none; color: var(--text); transition: all 0.2s; margin-bottom: 5px; }
+  .coupang-exact:hover { background: #ff3e6c18; }
+  .exact-badge { font-size: 10px; font-weight: 700; background: var(--accent); color: #fff; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+  .coupang-general { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; text-decoration: none; color: var(--text); transition: all 0.2s; }
+  .youtube-btn { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; text-decoration: none; color: var(--text); transition: all 0.2s; }
+  .youtube-btn:hover { border-color: var(--border2); }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+  .save-btn-full { width: 100%; padding: 13px; background: var(--surface2); border: 1px dashed var(--border2); border-radius: 10px; color: var(--text2); font-size: 14px; cursor: pointer; transition: all 0.2s; }
+  .save-btn-full:hover { border-color: var(--success); color: var(--success); background: #00c97a11; }
+
+  .style-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 1rem; }
+  .style-card { padding: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+  .style-card.active { border-color: var(--accent); background: #ff3e6c0d; }
+  .style-card .style-icon { font-size: 20px; margin-bottom: 6px; }
+  .style-card .style-name { font-size: 13px; font-weight: 600; }
+  .style-card .style-desc { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+  .script-output { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; display: none; }
+  .script-type-label { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.08em; margin-bottom: 10px; }
+  .script-text { font-size: 14px; line-height: 1.9; color: var(--text); white-space: pre-wrap; word-break: keep-all; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1.25rem; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+  .stat-num { font-size: 22px; font-weight: 700; }
+  .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .filter-row { display: flex; gap: 6px; margin-bottom: 1rem; }
+  .filter-btn { padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text2); font-size: 12px; cursor: pointer; }
+  .filter-btn.active { border-color: var(--accent); color: var(--accent); }
+  .storage-empty { text-align: center; padding: 3rem 1rem; color: var(--text3); font-size: 14px; }
+  .storage-empty .icon { font-size: 36px; margin-bottom: 10px; }
+  .storage-item { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; }
+  .item-name { font-size: 14px; font-weight: 500; }
+  .item-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .status-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+  .status-unused { background: #f59e0b22; color: var(--warn); }
+  .status-wip { background: #3b82f622; color: var(--info); }
+  .status-done { background: #00c97a22; color: var(--success); }
+  .del-btn { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 15px; padding: 4px; }
+  .del-btn:hover { color: var(--accent); }
+  .orig-link { font-size: 11px; color: var(--info); text-decoration: none; padding: 3px 7px; border-radius: 6px; border: 1px solid #3b82f633; white-space: nowrap; }
+
+  .setting-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem; margin-bottom: 1rem; }
+  .setting-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  .api-notice { font-size: 11px; color: var(--text3); margin-top: 6px; line-height: 1.8; }
+
+  .char-count { font-size: 11px; color: var(--text3); text-align: right; margin-top: 4px; }
+  .char-count.good { color: var(--success); }
+  .char-count.warn { color: var(--warn); }
+  .script-version { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+  .version-label { font-size: 11px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+  .version-text { font-size: 13px; line-height: 1.9; white-space: pre-wrap; word-break: keep-all; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #fff; color: #111; padding: 10px 20px; border-radius: 999px; font-size: 13px; font-weight: 600; transition: transform 0.3s; z-index: 999; pointer-events: none; max-width: 320px; text-align: center; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🛍</div>
+  <div>
+    <h1>쇼핑 소재 수집기</h1>
+    <p>소재 찾기 · 대본 생성 · 보관함 관리</p>
+  </div>
+</header>
+
+<div class="demo-banner" id="demoBanner" style="display: none;">⚡ 데모 모드 — ⚙️ 설정에서 OpenAI API 키 입력하면 실제 AI 분석 가능</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(&#39;find&#39;)">🔍 소재찾기</div>
+  <div class="tab" onclick="switchTab(&#39;script&#39;)">✍️ 대본생성</div>
+  <div class="tab" onclick="switchTab(&#39;storage&#39;)">📦 보관함 <span id="storageCount"></span></div>
+  <div class="tab" onclick="switchTab(&#39;settings&#39;)">⚙️</div>
+</div>
+
+<!-- 소재 찾기 -->
+<div class="tab-content active" id="tab-find">
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeImageBtn" onclick="setMode(&#39;image&#39;)">📷 이미지</button>
+    <button class="mode-btn" id="modeManualBtn" onclick="setMode(&#39;manual&#39;)">✏️ 직접입력</button>
+  </div>
+
+  <div id="mode-image">
+    <div class="img-upload-area" id="uploadArea" onclick="document.getElementById(&#39;imgFile&#39;).click()">
+      <input type="file" id="imgFile" accept="image/*" onchange="onImgSelect(event)" style="display:none">
+      <div class="upload-icon">📸</div>
+      <p style="font-size:13px;color:var(--text2);">스크린샷 또는 제품 이미지 업로드</p>
+      <small style="font-size:11px;color:var(--text3);">인스타·유튜브 캡처 이미지를 올려줘요</small>
+    </div>
+    <img id="imgPreview" class="img-preview">
+    <div id="imgBtnRow" style="display:none;gap:8px;margin-bottom:1rem;">
+      <button class="btn btn-primary" id="imgAnalyzeBtn" onclick="analyzeImage()" style="flex:1;">이미지 분석하기</button>
+      <button class="btn btn-ghost" onclick="resetImage()">🔄 다른 이미지</button>
+    </div>
+  </div>
+
+  <div id="mode-manual" style="display:none;">
+    <div class="input-group">
+      <label class="input-label">제품명 (한국어)</label>
+      <input type="text" id="manualKo" placeholder="예: 신발 밑창 보호 투명 스티커">
+    </div>
+    <div class="input-group">
+      <label class="input-label">원본 링크 (선택)</label>
+      <input type="text" id="manualUrl" placeholder="https://...">
+    </div>
+    <button class="btn btn-primary" onclick="analyzeManual()" style="width:100%;">검색어 생성</button>
+  </div>
+
+  <div class="loading" id="loadingMsg">
+    <div class="spinner"></div>
+    AI가 제품을 분석하는 중...
+  </div>
+
+  <div class="result-card" id="resultCard">
+    <div class="product-title" id="productTitle"></div>
+    <div class="product-sub" id="productSub"></div>
+    <div class="section-label">키워드 (클릭 → 복사)</div>
+    <div class="kw-wrap" id="kwWrap"></div>
+    <div class="section-label">중국 사이트 검색</div>
+    <div id="cnSites"></div>
+    <div class="divider"></div>
+    <div class="section-label">쿠팡</div>
+    <div id="coupangBlock" style="margin-bottom:1rem;"></div>
+    <div class="section-label">유튜브</div>
+    <div id="youtubeBlock" style="margin-bottom:1rem;"></div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:8px;">
+      <button class="save-btn-full" onclick="saveToStorage()" style="flex:1;">＋ 보관함 저장</button>
+      <button class="btn btn-ghost" onclick="goToScript()" style="flex:1;">✍️ 대본 생성 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- 대본 생성기 -->
+<div class="tab-content" id="tab-script">
+  <div class="input-group">
+    <label class="input-label">제품명</label>
+    <input type="text" id="scriptProduct" placeholder="예: 신발 밑창 보호 투명 스티커">
+  </div>
+  <div class="input-group">
+    <label class="input-label">제품 특징 (선택)</label>
+    <textarea id="scriptFeature" rows="3" placeholder="예: 두께 0.3mm, 미끄럼방지, 방수, 쉽게 떼어낼 수 있음"></textarea>
+  </div>
+  <div class="input-group">
+    <label class="input-label">훅 스타일</label>
+    <div class="style-grid">
+      <div class="style-card active" onclick="selectHook(this,&#39;friend&#39;)" data-hook="friend">
+        <div class="style-icon">👫</div>
+        <div class="style-name">지인 발견</div>
+        <div class="style-desc">친구·언니·남편이 쓰는 거 봤는데</div>
+      </div>
+      <div class="style-card" onclick="selectHook(this,&#39;experience&#39;)" data-hook="experience">
+        <div class="style-icon">😤</div>
+        <div class="style-name">내 경험</div>
+        <div class="style-desc">나 이거 때문에 진짜 힘들었는데</div>
+      </div>
+      <div class="style-card" onclick="selectHook(this,&#39;compare&#39;)" data-hook="compare">
+        <div class="style-icon">😳</div>
+        <div class="style-name">비교 공감</div>
+        <div class="style-desc">옆에 있는 사람이랑 비교됐어요</div>
+      </div>
+      <div class="style-card" onclick="selectHook(this,&#39;surprise&#39;)" data-hook="surprise">
+        <div class="style-icon">😱</div>
+        <div class="style-name">깜짝 발견</div>
+        <div class="style-desc">어디서 우연히 보고 충격받았는데</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading" id="scriptLoading">
+    <div class="spinner"></div>
+    대본을 생성하는 중...
+  </div>
+
+  <button class="btn btn-primary" onclick="generateScript()" style="width:100%;margin-bottom:1rem;" id="genBtn">대본 생성하기</button>
+
+  <div class="script-output" id="instaOutput">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div class="script-type-label" style="margin-bottom:0;">📱 인스타그램 대본 5버전</div>
+      <button class="btn btn-ghost" onclick="regenScript(&#39;insta&#39;)" style="font-size:12px;padding:6px 12px;">🔄 재생성</button>
+    </div>
+    <div id="instaVersions"></div>
+  </div>
+
+  <div class="script-output" id="threadOutput">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div class="script-type-label" style="margin-bottom:0;">💬 스레드 반말 대본</div>
+      <button class="btn btn-ghost" onclick="regenScript(&#39;thread&#39;)" style="font-size:12px;padding:6px 12px;">🔄 재생성</button>
+    </div>
+    <div class="script-text" id="threadText"></div>
+    <div style="margin-top:10px;">
+      <button class="btn btn-ghost" onclick="copyScript(&#39;thread&#39;)">📋 복사</button>
+    </div>
+  </div>
+
+  <div class="script-output" id="blogOutput">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div class="script-type-label" style="margin-bottom:0;">📝 네이버 블로그 (SEO 최적화)</div>
+      <button class="btn btn-ghost" onclick="regenScript(&#39;blog&#39;)" style="font-size:12px;padding:6px 12px;">🔄 재생성</button>
+    </div>
+    <div class="script-text" id="blogText"></div>
+    <div class="char-count" id="blogCount"></div>
+    <div style="margin-top:10px;">
+      <button class="btn btn-ghost" onclick="copyScript(&#39;blog&#39;)">📋 복사</button>
+    </div>
+  </div>
+</div>
+
+<!-- 보관함 -->
+<div class="tab-content" id="tab-storage">
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">전체</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-unused" style="color:var(--warn)">0</div><div class="stat-label">미사용</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-done" style="color:var(--success)">0</div><div class="stat-label">완료</div></div>
+  </div>
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="setFilter(this,&#39;all&#39;)">전체</button>
+    <button class="filter-btn" onclick="setFilter(this,&#39;unused&#39;)">미사용</button>
+    <button class="filter-btn" onclick="setFilter(this,&#39;wip&#39;)">제작중</button>
+    <button class="filter-btn" onclick="setFilter(this,&#39;done&#39;)">완료</button>
+  </div>
+  <div id="storageList"></div>
+</div>
+
+<!-- 설정 -->
+<div class="tab-content" id="tab-settings">
+  <div class="setting-card">
+    <div class="setting-title">🔑 OpenAI API 키</div>
+    <input type="password" id="apiKeyInput" placeholder="sk-proj-...">
+    <div class="api-notice">
+      • OpenAI API 키 입력하면 이미지 분석 + 대본 생성 실제 AI로 작동<br>
+      • 키는 이 기기 브라우저에만 저장돼요<br>
+      • <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--info);">platform.openai.com</a> 에서 발급
+    </div>
+    <button class="btn btn-primary" onclick="saveApiKey()" style="margin-top:12px;width:100%;">저장</button>
+  </div>
+  <div class="setting-card">
+    <div class="setting-title">📌 사용 방법</div>
+    <div style="font-size:12px;color:var(--text2);line-height:2.2;">
+      1. 🔍 소재찾기: 이미지/직접입력으로 제품 분석<br>
+      2. 중국 4개 사이트 검색어 3개씩 연결<br>
+      3. ✍️ 대본생성: 인스타 + 스레드 + 블로그 동시 생성<br>
+      4. 블로그 대본은 1,500자+ SEO 최적화<br>
+      5. 📦 보관함: 상태별 소재 관리
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const WORKER_URL = 'https://claude-proxy.ducklin0366.workers.dev';
+
+const DEMO_FIND = {
+  productName: "신발 밑창 보호 투명 스티커",
+  productNameEn: "Shoe Sole Protector Sticker",
+  productNameCn: "鞋底保护贴",
+  category: "신발 용품",
+  exactName: "신발 밑창 보강 패드 운동화 마모방지 밑창보강 투명 스티커",
+  keywords: { ko:["밑창스티커","신발보호","마모방지","투명스티커"], en:["sole protector","shoe sticker","anti wear"], cn:["鞋底保护贴","防磨损贴","透明鞋底贴"] },
+  searchTerms: {
+    xiaohongshu: ["鞋底保护贴 透明", "运动鞋底防磨贴", "鞋底贴 好物推荐"],
+    taobao: ["鞋底保护贴 透明防磨", "运动鞋底贴 防滑耐磨", "鞋底修复保护贴"],
+    douyin: ["鞋底保护贴推荐", "鞋底防磨神器", "透明鞋底贴测评"],
+    tiktok: ["鞋底保护贴 开箱", "透明鞋底防磨贴", "鞋底贴 好用吗"],
+    youtube: "신발 밑창 보호 스티커 꿀템 리뷰",
+    coupang: "신발 밑창 보호 투명 스티커 마모방지"
+  }
+};
+
+let currentData = null;
+let currentImgBase64 = null;
+let currentMediaType = 'image/jpeg';
+let selectedHook = 'friend';
+let storageItems = JSON.parse(localStorage.getItem('shopping_v5') || '[]');
+let currentFilter = 'all';
+
+const statusMap = {
+  unused: { label: '미사용', cls: 'status-unused', next: 'wip' },
+  wip:    { label: '제작중', cls: 'status-wip',    next: 'done' },
+  done:   { label: '완료',   cls: 'status-done',   next: 'unused' }
+};
+
+const HOOK_MAP = {
+  friend:     '지인(친구·언니·남편 등)이 쓰는 걸 우연히 발견하는 상황으로 시작',
+  experience: '내가 직접 겪었던 불편함·문제 상황으로 시작',
+  compare:    '주변 사람과 비교되어 창피하거나 부러웠던 상황으로 시작',
+  surprise:   '어디선가 우연히 보고 충격받은 상황으로 시작'
+};
+
+function getApiKey() { return localStorage.getItem('claude_api_key') || ''; }
+function isDemo() { return !getApiKey(); }
+
+function saveApiKey() {
+  const k = document.getElementById('apiKeyInput').value.trim();
+  if (!k) { showToast('API 키를 입력해줘요!'); return; }
+  localStorage.setItem('claude_api_key', k);
+  document.getElementById('demoBanner').style.display = 'none';
+  showToast('✅ API 키 저장됨!');
+}
+
+function switchTab(n) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['find','script','storage','settings'][i] === n));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + n).classList.add('active');
+  if (n === 'storage') renderStorage();
+  if (n === 'settings' && getApiKey()) document.getElementById('apiKeyInput').value = getApiKey();
+}
+
+function setMode(m) {
+  ['image','manual'].forEach(x => {
+    document.getElementById('mode-' + x).style.display = x === m ? 'block' : 'none';
+    document.getElementById('mode' + x[0].toUpperCase() + x.slice(1) + 'Btn').classList.toggle('active', x === m);
+  });
+  document.getElementById('resultCard').style.display = 'none';
+}
+
+function selectHook(el, hook) {
+  document.querySelectorAll('.style-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  selectedHook = hook;
+}
+
+function resetImage() {
+  currentImgBase64 = null;
+  document.getElementById('imgPreview').style.display = 'none';
+  document.getElementById('imgBtnRow').style.display = 'none';
+  document.getElementById('uploadArea').style.display = 'block';
+  document.getElementById('imgFile').value = '';
+  document.getElementById('resultCard').style.display = 'none';
+}
+
+function onImgSelect(e) {
+  const file = e.target.files[0]; if (!file) return;
+  currentMediaType = file.type || 'image/jpeg';
+  const reader = new FileReader();
+  reader.onload = ev => {
+    currentImgBase64 = ev.target.result.split(',')[1];
+    const p = document.getElementById('imgPreview');
+    p.src = ev.target.result; p.style.display = 'block';
+    document.getElementById('imgBtnRow').style.display = 'flex';
+    document.getElementById('uploadArea').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+const FIND_PROMPT = `JSON으로만 답해줘. 다른 텍스트 없이:
+{"productName":"한국어제품명","productNameEn":"English","productNameCn":"中文","category":"카테고리","exactName":"이미지에 보이는 정확한 한국어 상품명 (쿠팡 검색용)","keywords":{"ko":["키1","키2","키3","키4"],"en":["kw1","kw2","kw3"],"cn":["词1","词2","词3"]},"searchTerms":{"xiaohongshu":["중국어1","중국어2","중국어3"],"taobao":["중국어1","중국어2","중국어3"],"douyin":["중국어1","중국어2","중국어3"],"tiktok":["중국어1","중국어2","중국어3"],"youtube":"유튜브 한국어 검색어","coupang":"쿠팡 한국어 검색어"}}
+중국 4개 사이트는 반드시 중국어 검색어 3개씩 배열로.`;
+
+// ── OpenAI API 호출 (Worker 경유) ──
+async function callOpenAI(messages, maxTokens = 1500) {
+  const res = await fetch(WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      apiKey: getApiKey(),
+      messages,
+      maxTokens
+    })
+  });
+  const d = await res.json();
+  if (d.error) throw new Error(d.error.message || JSON.stringify(d.error));
+  return d.choices[0].message.content;
+}
+
+async function analyzeImage() {
+  if (!currentImgBase64) return;
+  const btn = document.getElementById('imgAnalyzeBtn'); btn.disabled = true;
+  document.getElementById('loadingMsg').style.display = 'block';
+  document.getElementById('resultCard').style.display = 'none';
+
+  if (isDemo()) {
+    await sleep(1500);
+    currentData = {...DEMO_FIND, url:''};
+    renderResult(DEMO_FIND, true);
+  } else {
+    try {
+      const text = await callOpenAI([{
+        role: 'user',
+        content: [
+          { type: 'image_url', image_url: { url: `data:${currentMediaType};base64,${currentImgBase64}` } },
+          { type: 'text', text: '이 이미지의 제품을 분석해줘.\n' + FIND_PROMPT }
+        ]
+      }]);
+      const p = JSON.parse(text.replace(/```json|```/g,'').trim());
+      currentData = {...p, url:''};
+      renderResult(p, false);
+    } catch(e) { showToast('분석 오류! ' + e.message); }
+  }
+  btn.disabled = false;
+  document.getElementById('loadingMsg').style.display = 'none';
+}
+
+async function analyzeManual() {
+  const ko = document.getElementById('manualKo').value.trim();
+  if (!ko) { showToast('제품명 입력해줘요!'); return; }
+  const url = document.getElementById('manualUrl').value.trim();
+  document.getElementById('loadingMsg').style.display = 'block';
+  document.getElementById('resultCard').style.display = 'none';
+
+  if (isDemo()) {
+    await sleep(1000);
+    currentData = {...DEMO_FIND, productName:ko, exactName:ko, url};
+    renderResult({...DEMO_FIND, productName:ko, exactName:ko}, true);
+  } else {
+    try {
+      const text = await callOpenAI([{
+        role: 'user',
+        content: '제품명: ' + ko + '\n' + FIND_PROMPT
+      }]);
+      const p = JSON.parse(text.replace(/```json|```/g,'').trim());
+      currentData = {...p, url:url||''};
+      renderResult(p, false);
+    } catch(e) { showToast('분석 오류! ' + e.message); }
+  }
+  document.getElementById('loadingMsg').style.display = 'none';
+}
+
+function renderResult(d, demo) {
+  document.getElementById('productTitle').textContent = d.productName + (demo?' (데모)':'');
+  document.getElementById('productSub').textContent = d.category+' · '+d.productNameEn+' · '+d.productNameCn;
+  const kw = document.getElementById('kwWrap'); kw.innerHTML = '';
+  d.keywords.ko.forEach(k => kw.innerHTML += `<span class="kw-tag" onclick="copyText('${k}')">${k}</span>`);
+  d.keywords.cn.forEach(k => kw.innerHTML += `<span class="kw-tag cn" onclick="copyText('${k}')">${k}</span>`);
+  d.keywords.en.forEach(k => kw.innerHTML += `<span class="kw-tag en" onclick="copyText('${k}')">${k}</span>`);
+
+  const cnSites = [
+    {name:'🌸 샤오홍슈', key:'xiaohongshu', base:'https://www.xiaohongshu.com/search_result?keyword='},
+    {name:'🛒 타오바오',  key:'taobao',      base:'https://s.taobao.com/search?q='},
+    {name:'🎵 도우인',   key:'douyin',      base:'https://www.douyin.com/search/'},
+    {name:'▶️ 틱톡',     key:'tiktok',      base:'https://www.tiktok.com/search?q='},
+  ];
+  const cnEl = document.getElementById('cnSites'); cnEl.innerHTML = '';
+  cnSites.forEach(site => {
+    const terms = Array.isArray(d.searchTerms[site.key]) ? d.searchTerms[site.key] : [d.searchTerms[site.key]];
+    cnEl.innerHTML += `<div class="site-block"><div class="site-header"><span class="site-name">${site.name}</span></div><div class="search-terms">
+      ${terms.map((t,i)=>`<a class="search-term-row" href="${site.base}${encodeURIComponent(t)}" target="_blank" rel="noopener"><span class="term-num">${i+1}</span><span class="term-text">${t}</span><span class="term-go">→</span></a>`).join('')}
+    </div></div>`;
+  });
+
+  const eq = d.exactName||d.productName, gq = d.searchTerms.coupang;
+  document.getElementById('coupangBlock').innerHTML = `
+    <a class="coupang-exact" href="https://www.coupang.com/np/search?q=${encodeURIComponent(eq)}" target="_blank" rel="noopener">
+      <span class="exact-badge">정확</span><span style="flex:1;font-size:13px;">${eq}</span><span style="font-size:11px;color:var(--text3);">→</span>
+    </a>
+    <a class="coupang-general" href="https://www.coupang.com/np/search?q=${encodeURIComponent(gq)}" target="_blank" rel="noopener">
+      <span style="font-size:11px;color:var(--text3);width:14px;">일반</span><span style="flex:1;font-size:13px;">${gq}</span><span style="font-size:11px;color:var(--text3);">→</span>
+    </a>`;
+  const ytQ = d.searchTerms.youtube;
+  document.getElementById('youtubeBlock').innerHTML = `
+    <a class="youtube-btn" href="https://www.youtube.com/results?search_query=${encodeURIComponent(ytQ)}" target="_blank" rel="noopener">
+      <span style="font-size:20px;">📺</span><div style="flex:1;"><div style="font-size:13px;font-weight:600;">유튜브</div><div style="font-size:11px;color:var(--text3);margin-top:1px;">${ytQ}</div></div>
+    </a>`;
+  document.getElementById('resultCard').style.display = 'block';
+}
+
+function goToScript() {
+  if (currentData) document.getElementById('scriptProduct').value = currentData.productName;
+  switchTab('script');
+}
+
+// ── 대본 생성 ──
+const SCRIPT_SYSTEM = `너는 30대 주부 인플루언서야. 초등 저학년 아이를 키우고 있고, 알뜰하고 현실적인 성격이야.
+
+[핵심 대본 공식]
+① 일상 상황에서 우연히 발견 (훅)
+② 궁금해서 물어봄
+③ 제품 효과 자연스럽게 설명
+④ 나도 구매함
+⑤ CTA
+
+[절대 규칙]
+- 인스타 5버전: 장소 모두 달라야 함 (마트/학교앞/공원/키즈카페/남편픽 등)
+- 광고 티 절대 안 남 - 진짜 경험담처럼
+- 구어체, 줄바꿈 자연스럽게
+- CTA: 댓글에 [제품키워드] 남겨주시면 링크 드려요
+
+[블로그 규칙]
+- 1500자 이상 필수
+- ## 소제목 4개 이상
+- 제품명 키워드 5회 이상 반복
+- 구매 유도 문구 절대 금지
+- 해시태그 10개
+
+[스레드 규칙]
+- 반말체, 짧고 임팩트 있게
+- 댓글 유도 문구 절대 금지
+- 해시태그 6개`;
+
+async function generateScript() {
+  const product = document.getElementById('scriptProduct').value.trim();
+  const feature = document.getElementById('scriptFeature').value.trim();
+  if (!product) { showToast('제품명을 입력해줘요!'); return; }
+
+  const btn = document.getElementById('genBtn'); btn.disabled = true;
+  document.getElementById('scriptLoading').style.display = 'block';
+  ['instaOutput','threadOutput','blogOutput'].forEach(id => document.getElementById(id).style.display = 'none');
+
+  if (isDemo()) {
+    await sleep(2000);
+    showScriptResult(['데모 버전1','데모 버전2','데모 버전3','데모 버전4','데모 버전5'], '데모 스레드', '데모 블로그');
+  } else {
+    try {
+      const prompt = `제품명: ${product}
+${feature ? '제품 특징: '+feature : ''}
+훅 스타일: ${HOOK_MAP[selectedHook]}
+
+아래 JSON 형식으로만 생성해줘. 다른 텍스트 없이:
+{
+  "insta": ["버전1 (마트)", "버전2 (학교앞)", "버전3 (남편픽)", "버전4 (키즈카페)", "버전5 (공원)"],
+  "thread": "스레드 반말 대본 + 해시태그 6개",
+  "blog": "블로그 대본 1500자이상 제목+소제목4개+해시태그10개"
+}`;
+      const text = await callOpenAI([
+        { role: 'system', content: SCRIPT_SYSTEM },
+        { role: 'user', content: prompt }
+      ], 4000);
+      const p = JSON.parse(text.replace(/```json|```/g,'').trim());
+      showScriptResult(p.insta, p.thread, p.blog);
+    } catch(e) { showToast('생성 오류! ' + e.message); }
+  }
+
+  btn.disabled = false;
+  document.getElementById('scriptLoading').style.display = 'none';
+}
+
+function showScriptResult(instaArr, thread, blog) {
+  const container = document.getElementById('instaVersions');
+  container.innerHTML = '';
+  const versions = Array.isArray(instaArr) ? instaArr : [instaArr];
+  versions.forEach((txt, i) => {
+    container.innerHTML += `<div class="script-version">
+      <div class="version-label">버전 ${i+1}</div>
+      <div class="script-text version-text">${txt}</div>
+      <div style="margin-top:10px;">
+        <button class="btn btn-ghost" onclick="copyScriptText(this)">📋 복사</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById('instaOutput').style.display = 'block';
+  document.getElementById('threadText').textContent = thread || '';
+  document.getElementById('threadOutput').style.display = 'block';
+  document.getElementById('blogText').textContent = blog;
+  const bEl = document.getElementById('blogCount');
+  bEl.textContent = `${blog.length}자 / 검색 노출 ${blog.length >= 1500 ? '✅ 충분' : '⚠️ 부족'}`;
+  bEl.className = 'char-count ' + (blog.length >= 1500 ? 'good' : 'warn');
+  document.getElementById('blogOutput').style.display = 'block';
+}
+
+async function regenScript(type) {
+  const product = document.getElementById('scriptProduct').value.trim();
+  if (!product) { showToast('제품명을 입력해줘요!'); return; }
+  document.getElementById(type+'Output').style.display = 'none';
+  document.getElementById('scriptLoading').style.display = 'block';
+
+  if (!isDemo()) {
+    const feature = document.getElementById('scriptFeature').value.trim();
+    const typeLabel = type === 'insta'
+      ? '인스타그램 릴스용 대본 5버전을 JSON 배열로만 {"insta":["버전1","버전2","버전3","버전4","버전5"]}'
+      : type === 'thread'
+      ? '스레드 반말 대본을 JSON으로만 {"thread":"내용"}'
+      : '네이버 블로그 대본 1500자이상을 JSON으로만 {"blog":"내용"}';
+    try {
+      const text = await callOpenAI([
+        { role: 'system', content: SCRIPT_SYSTEM },
+        { role: 'user', content: `제품명: ${product}\n${feature?'특징: '+feature:''}\n훅: ${HOOK_MAP[selectedHook]}\n\n${typeLabel}` }
+      ], 3000);
+      const p = JSON.parse(text.replace(/```json|```/g,'').trim());
+      if (type === 'insta') {
+        showScriptResult(p.insta, document.getElementById('threadText').textContent, document.getElementById('blogText').textContent);
+      } else if (type === 'thread') {
+        document.getElementById('threadText').textContent = p.thread;
+        document.getElementById('threadOutput').style.display = 'block';
+      } else {
+        document.getElementById('blogText').textContent = p.blog;
+        const bEl = document.getElementById('blogCount');
+        bEl.textContent = `${p.blog.length}자 / ${p.blog.length>=1500?'✅ 충분':'⚠️ 부족'}`;
+        bEl.className = 'char-count '+(p.blog.length>=1500?'good':'warn');
+        document.getElementById('blogOutput').style.display = 'block';
+      }
+    } catch(e) { showToast('재생성 오류! ' + e.message); }
+  }
+  document.getElementById('scriptLoading').style.display = 'none';
+}
+
+function copyScriptText(btn) {
+  const text = btn.closest('.script-version').querySelector('.version-text').textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('📋 복사됐어요!'));
+}
+
+function copyScript(type) {
+  const el = document.getElementById(type+'Text');
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => showToast('📋 복사됐어요!'));
+}
+
+function saveToStorage() {
+  if (!currentData) return;
+  storageItems.unshift({id:Date.now(), name:currentData.productName, category:currentData.category||'', url:currentData.url||'', status:'unused', savedAt:new Date().toLocaleDateString('ko-KR')});
+  localStorage.setItem('shopping_v5', JSON.stringify(storageItems));
+  updateStorageCount();
+  showToast('✅ 보관함에 저장됐어요!');
+  document.getElementById('resultCard').style.display = 'none';
+  currentData = null; currentImgBase64 = null;
+  document.getElementById('imgPreview').style.display = 'none';
+  document.getElementById('imgBtnRow').style.display = 'none';
+  document.getElementById('uploadArea').style.display = 'block';
+  document.getElementById('manualKo').value = '';
+}
+
+function renderStorage() {
+  const f = currentFilter==='all' ? storageItems : storageItems.filter(i=>i.status===currentFilter);
+  document.getElementById('stat-total').textContent = storageItems.length;
+  document.getElementById('stat-unused').textContent = storageItems.filter(i=>i.status==='unused').length;
+  document.getElementById('stat-done').textContent = storageItems.filter(i=>i.status==='done').length;
+  if (!f.length) {
+    document.getElementById('storageList').innerHTML = `<div class="storage-empty"><div class="icon">📭</div>${currentFilter==='all'?'아직 저장된 소재가 없어요':'해당 상태의 소재가 없어요'}</div>`;
+    return;
+  }
+  document.getElementById('storageList').innerHTML = f.map(item => {
+    const s = statusMap[item.status];
+    return `<div class="storage-item">
+      <div style="flex:1;min-width:0;"><div class="item-name">${item.name}</div><div class="item-meta">${item.category} · ${item.savedAt}</div></div>
+      ${item.url?`<a class="orig-link" href="${item.url}" target="_blank">원본</a>`:''}
+      <span class="status-badge ${s.cls}" onclick="toggleStatus(${item.id})">${s.label}</span>
+      <button class="del-btn" onclick="deleteItem(${item.id})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function setFilter(el,f) { currentFilter=f; document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); el.classList.add('active'); renderStorage(); }
+function toggleStatus(id) { const i=storageItems.find(x=>x.id===id); if(i){ i.status=statusMap[i.status].next; localStorage.setItem('shopping_v5',JSON.stringify(storageItems)); renderStorage(); } }
+function deleteItem(id) { if(!confirm('삭제할까요?'))return; storageItems=storageItems.filter(i=>i.id!==id); localStorage.setItem('shopping_v5',JSON.stringify(storageItems)); renderStorage(); updateStorageCount(); }
+function updateStorageCount() { document.getElementById('storageCount').textContent = storageItems.length>0?`(${storageItems.length})`:''; }
+function copyText(t) { navigator.clipboard.writeText(t).then(()=>showToast(`"${t}" 복사됨!`)); }
+function showToast(msg) { const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2200); }
+function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
+
+if (getApiKey()) document.getElementById('demoBanner').style.display = 'none';
+updateStorageCount();
+</script>
+
+
+</body></html>
